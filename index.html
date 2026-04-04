@@ -125,31 +125,35 @@
 
       function setDay(day) {
     selectedDay = day;
-    // Resaltar el botón que picamos
+    
+    // 1. Quitamos el resaltado de todos y se lo ponemos al que picamos
     document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('day-active'));
-    event.target.classList.add('day-active');
+    // Usamos el ID para asegurar que siempre agarramos el botón correcto
+    document.getElementById(`btn-${day}`).classList.add('day-active');
 
-    // Mostramos los barberos
     const grid = document.getElementById('barber-grid');
     grid.classList.remove('opacity-30', 'pointer-events-none');
 
-    // --- LÓGICA NUEVA: BUSCAR DESCANSOS ---
+    // 2. IMPORTANTE: Apagamos cualquier oreja anterior para que no se amontonen
+    db.ref(`config/descansos/${currentWeek}`).off();
+
+    // 3. Escuchamos quién descansa este día
     db.ref(`config/descansos/${currentWeek}/${day}`).on('value', (snapshot) => {
         const descansos = snapshot.val() || {};
         const botonesBarberos = grid.querySelectorAll('button');
         
         botonesBarberos.forEach(btn => {
-            // Sacamos el nombre del barbero del texto del botón
-            const nombreBarber = btn.querySelector('p').innerText;
+            // .trim() quita espacios accidentales que rompen la comparación
+            const nombreBarber = btn.querySelector('p').innerText.trim();
             
             if (descansos[nombreBarber]) {
-                // Si está en la lista de descansos: Lo bloqueamos
+                // BLOQUEADO
                 btn.disabled = true;
                 btn.style.opacity = "0.1";
                 btn.style.filter = "grayscale(100%)";
                 btn.style.cursor = "not-allowed";
             } else {
-                // Si NO está: Lo dejamos normal
+                // ACTIVO (Esto es lo que hace que el "desbloqueo" se vea al instante)
                 btn.disabled = false;
                 btn.style.opacity = "1";
                 btn.style.filter = "none";

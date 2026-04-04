@@ -174,19 +174,29 @@
                 .catch(err => alert("Error: " + err));
             }
         }// <--- Esta cierra liberarCita
-        // --- FUNCIÓN PARA BLOQUEAR/DESBLOQUEAR BARBEROS ---
+        // 4. Función de Eliminación
+        function liberarCita(dia, barbero, id) {
+            if(confirm(`¿Confirmas liberar este espacio de las ${id} para ${barbero}?`)) {
+                db.ref(`citas/${currentWeek}/${dia}/${barbero}/${id}`).remove()
+                .catch(err => alert("Error: " + err));
+            }
+        }
+        // --- NUEVA FUNCIÓN DE DESCANSOS ---
         function toggleDescanso(estado) {
             const dia = document.getElementById('select-dia-descanso').value;
             const barber = document.getElementById('select-barber-descanso').value;
             
             if (estado) {
-                // Guarda el bloqueo en la nube
                 db.ref(`config/descansos/${currentWeek}/${dia}/${barber}`).set(true)
-                .then(() => alert(`✅ ${barber} bloqueado para el ${dia}`));
+                .then(() => {
+                    alert(`🚫 BLOQUEADO: ${barber} no aparecerá el ${dia}`);
+                });
             } else {
-                // Quita el bloqueo
+                // Al usar .remove(), la "oreja" del index detecta que ya no existe el bloqueo
                 db.ref(`config/descansos/${currentWeek}/${dia}/${barber}`).remove()
-                .then(() => alert(`✨ ${barber} activado nuevamente para el ${dia}`));
+                .then(() => {
+                    alert(`✅ ACTIVADO: ${barber} ya puede recibir citas el ${dia}`);
+                });
             }
         }
     </script> 
