@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bronx Barber Studio | Agenda Semanal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+        .gothic { font-family: 'UnifrakturMaguntia', cursive; }
+        .slot-booked { background-color: #18181b; color: #3f3f46; cursor: not-allowed; text-decoration: line-through; border: 1px solid #27272a; }
+        .slot-available { background-color: #fff; color: #000; cursor: pointer; border: 1px solid #fff; }
+        .day-btn { border: 1px solid #27272a; transition: all 0.2s; }
+        .day-active { border-color: #fff; background-color: #fff; color: #000; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <header class="py-10 text-center border-b border-zinc-900">
+        <h1 class="text-6xl gothic">B</h1>
+        <p id="week-display" class="uppercase tracking-[0.3em] text-[9px] mt-3 font-bold text-zinc-500"></p>
+    </header>
+
+    <main class="max-w-md mx-auto p-6">
+        
+        <section id="step-1">
+            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">1. Elige el día de esta semana</h2>
+            <div class="grid grid-cols-4 gap-2 mb-8">
+                <button onclick="setDay('Lunes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Lun</button>
+                <button onclick="setDay('Martes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mar</button>
+                <button onclick="setDay('Miercoles')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mie</button>
+                <button onclick="setDay('Jueves')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Jue</button>
+                <button onclick="setDay('Viernes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Vie</button>
+                <button onclick="setDay('Sabado')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Sab</button>
+                <button onclick="setDay('Domingo')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase col-span-2">Dom</button>
+            </div>
+
+            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">2. Selecciona a tu barbero</h2>
+            <div id="barber-grid" class="grid grid-cols-2 gap-4 opacity-30 pointer-events-none">
+                <button onclick="selectBarber('Barbero 1')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800 hover:border-white transition-all">
+                    <div class="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-3"></div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-300">Barbero 1</p>
+                </button>
+                <button onclick="selectBarber('Barbero 2')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800 hover:border-white transition-all">
+                    <div class="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-3"></div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-300">Barbero 2</p>
+                </button>
+                <button onclick="selectBarber('Barbero 3')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800 hover:border-white transition-all">
+                    <div class="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-3"></div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-300">Barbero 3</p>
+                </button>
+                <button onclick="selectBarber('Barbero 4')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800 hover:border-white transition-all">
+                    <div class="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-3"></div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-300">Barbero 4</p>
+                </button>
+            </div>
+        </section>
+
+        <section id="step-2" class="hidden">
+            <button onclick="showStep(1)" class="text-zinc-500 text-[10px] mb-6 uppercase font-bold tracking-widest">← Volver</button>
+            <h2 id="selection-summary" class="text-lg font-bold mb-8 italic text-center uppercase border-b border-zinc-900 pb-4"></h2>
+            <div id="slots-container" class="grid grid-cols-3 gap-3"></div>
+        </section>
+
+        <section id="step-3" class="hidden">
+            <button onclick="showStep(2)" class="text-zinc-500 text-[10px] mb-6 uppercase font-bold tracking-widest">← Cambiar hora</button>
+            <h2 class="text-xs font-bold mb-8 text-center uppercase tracking-[0.3em] text-zinc-400">Tus datos</h2>
+            <div class="space-y-4">
+                <p id="final-details" class="text-[10px] text-zinc-500 text-center uppercase mb-4"></p>
+                <input type="text" id="client-name" placeholder="Tu Nombre Completo" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
+                <input type="tel" id="client-phone" placeholder="WhatsApp" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
+                <button onclick="confirmBooking()" class="w-full bg-white text-black font-extrabold py-5 rounded-2xl uppercase text-[11px] tracking-widest active:scale-95 transition-all">Agendar Cita</button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // CONFIGURACIÓN DE FIREBASE (TU DATA)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD16imBLTSC6YhiwKJK5PGza5g3a1N3J08",
+            authDomain: "bronxbarber-d9cb3.firebaseapp.com",
+            databaseURL: "https://bronxbarber-d9cb3-default-rtdb.firebaseio.com",
+            projectId: "bronxbarber-d9cb3",
+            storageBucket: "bronxbarber-d9cb3.firebasestorage.app",
+            messagingSenderId: "674799529579",
+            appId: "1:674799529579:web:813f9c27b2ee8f17e68b2e"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let selectedDay = "";
+        let selectedBarber = "";
+        let selectedTime = "";
+
+        function getWeekNumber() {
+            const d = new Date();
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        const currentWeek = `2026-W${getWeekNumber()}`;
+        document.getElementById('week-display').innerText = `SEMANA: ${currentWeek}`;
+
+        function showStep(n) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step-${n}`).classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function setDay(day) {
+            selectedDay = day;
+            document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('day-active'));
+            event.target.classList.add('day-active');
+            document.getElementById('barber-grid').classList.remove('opacity-30', 'pointer-events-none');
+        }
+
+        function selectBarber(name) {
+            selectedBarber = name;
+            document.getElementById('selection-summary').innerText = `${selectedDay} - ${name}`;
+            renderSlots();
+            showStep(2);
+        }
+
+        function renderSlots() {
+            const container = document.getElementById('slots-container');
+            container.innerHTML = `<p class="col-span-3 text-center text-[10px] text-zinc-600">Actualizando agenda...</p>`;
+            
+            const hours = (selectedDay === 'Domingo') 
+                ? ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM"]
+                : ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM"];
+
+            db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}`).on('value', (snapshot) => {
+                const booked = snapshot.val() || {};
+                container.innerHTML = "";
+                hours.forEach(t => {
+                    const key = t.replace(/[: ]/g, '');
+                    const isBooked = booked[key];
+                    const div = document.createElement('div');
+                    div.className = `p-4 text-[10px] font-bold rounded-xl text-center ${isBooked ? 'slot-booked' : 'slot-available'}`;
+                    div.innerText = t;
+                    if(!isBooked) div.onclick = () => { 
+                        selectedTime = t; 
+                        document.getElementById('final-details').innerText = `${selectedDay} a las ${selectedTime} con ${selectedBarber}`;
+                        showStep(3); 
+                    };
+                    container.appendChild(div);
+                });
+            });
+        }
+
+        function confirmBooking() {
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            if(!name || !phone) return alert("Pon tus datos completo, bro.");
+
+            const key = selectedTime.replace(/[: ]/g, '');
+            db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}/${key}`).set({
+                cliente: name, tel: phone, hora: selectedTime
+            }).then(() => {
+                alert("¡Excelente! Cita confirmada en Bronx Barber Studio.");
+                location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
