@@ -9,27 +9,56 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
-        .barber-card { background: #0a0a0a; border: 1px solid #1a1a1a; }
+        /* Si esta clase no existe, el admin no se oculta */
+        .oculto { display: none !important; }
     </style>
 </head>
-<body class="p-4 pb-20">
+<body class="p-4">
 
-    <header class="mb-8 border-b border-zinc-900 pb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-xl font-black italic uppercase tracking-tighter text-white">Bronx <span class="text-orange-500">Admin</span></h1>
-            <p id="week-label" class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1"></p>
+    <div id="pantalla-login" class="fixed inset-0 bg-black flex flex-col items-center justify-center p-6 z-50">
+        <h1 class="text-4xl font-black italic mb-8 tracking-tighter">BRONX <span class="text-orange-500">ADMIN</span></h1>
+        <div class="w-full max-w-xs space-y-4 text-center">
+            <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-[0.2em]">Acceso Restringido</p>
+            <input type="password" id="input-pass" placeholder="Código de Acceso" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-center text-lg outline-none focus:border-orange-500 text-white">
+            <button onclick="validarAcceso()" class="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-xs tracking-widest active:scale-95 transition-all">Desbloquear Panel</button>
+            <p id="error-txt" class="text-red-500 text-[10px] font-bold oculto">CÓDIGO INCORRECTO</p>
         </div>
-        <div class="bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
-            <span class="text-[10px] font-bold text-green-500 animate-pulse">● EN VIVO</span>
-        </div>
-    </header>
+    </div>
 
-    <div id="admin-content" class="space-y-6">
-        <p class="text-center text-zinc-600 text-xs animate-pulse">Conectando con la base de datos...</p>
+    <div id="panel-principal" class="oculto">
+        <header class="mb-8 border-b border-zinc-900 pb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-black italic uppercase tracking-tighter">Bronx <span class="text-orange-500">Admin</span></h1>
+                <p id="label-semana" class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1"></p>
+            </div>
+            <button onclick="location.reload()" class="text-[10px] font-bold text-zinc-500 underline">Cerrar</button>
+        </header>
+
+        <div id="admin-citas" class="space-y-6">
+            </div>
     </div>
 
     <script>
-        // TUS CREDENCIALES (Iguales a las del index)
+        // === LA LLAVE MAESTRA ===
+        const PASSWORD_CORRECTO = "BRONX2026"; 
+
+        function validarAcceso() {
+            const passIngresada = document.getElementById('input-pass').value;
+            const login = document.getElementById('pantalla-login');
+            const panel = document.getElementById('panel-principal');
+            const error = document.getElementById('error-txt');
+
+            if(passIngresada === PASSWORD_CORRECTO) {
+                login.classList.add('oculto'); // Escondemos el login
+                panel.classList.remove('oculto'); // Mostramos el admin
+                iniciarBaseDeDatos(); // Arrancamos Firebase
+            } else {
+                error.classList.remove('oculto');
+                document.getElementById('input-pass').value = "";
+            }
+        }
+
+        // === CONFIGURACIÓN FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyD16imBLTSC6YhiwKJK5PGza5g3a1N3J08",
             authDomain: "bronxbarber-d9cb3.firebaseapp.com",
@@ -43,7 +72,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Lógica de semana (Igual al index para estar sincronizados)
         function getWeekNumber() {
             const d = new Date(); d.setHours(0,0,0,0);
             d.setDate(d.getDate() + 4 - (d.getDay() || 7));
@@ -51,74 +79,59 @@
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
         const currentWeek = `2026-W${getWeekNumber()}`;
-        document.getElementById('week-label').innerText = `SEMANA ACTUAL: ${currentWeek}`;
+        document.getElementById('label-semana').innerText = `GESTIONANDO: ${currentWeek}`;
 
-        const barberos = ["Barbero 1", "Barbero 2", "Barbero 3", "Barbero 4"];
-        const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+        function iniciarBaseDeDatos() {
+            const container = document.getElementById('admin-citas');
+            const barberos = ["Barbero 1", "Barbero 2", "Barbero 3", "Barbero 4"];
+            const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
 
-        function loadAdmin() {
-            const container = document.getElementById('admin-content');
-            
-            // Escuchar TODAS las citas de la semana actual
             db.ref(`citas/${currentWeek}`).on('value', (snapshot) => {
                 container.innerHTML = "";
-                const weekData = snapshot.val() || {};
+                const data = snapshot.val() || {};
 
                 barberos.forEach(barber => {
-                    const section = document.createElement('div');
-                    section.className = "barber-card rounded-3xl p-5 mb-4";
-                    section.innerHTML = `<h2 class="text-xs font-black mb-4 text-zinc-400 uppercase tracking-[0.2em]">${barber}</h2>`;
+                    const card = document.createElement('div');
+                    card.className = "bg-zinc-900/50 rounded-3xl p-5 border border-zinc-800";
+                    card.innerHTML = `<h2 class="text-xs font-black mb-4 text-zinc-500 uppercase tracking-widest">${barber}</h2>`;
                     
                     const list = document.createElement('div');
                     list.className = "space-y-3";
-
-                    let hasCitas = false;
+                    let hayCitas = false;
 
                     dias.forEach(dia => {
-                        const dayCitas = weekData[dia] ? weekData[dia][barber] : null;
-                        if(dayCitas) {
-                            Object.keys(dayCitas).forEach(timeKey => {
-                                hasCitas = true;
-                                const c = dayCitas[timeKey];
+                        const citasDia = data[dia] ? data[dia][barber] : null;
+                        if(citasDia) {
+                            Object.keys(citasDia).forEach(key => {
+                                hayCitas = true;
+                                const c = citasDia[key];
                                 const row = document.createElement('div');
-                                row.className = "flex justify-between items-center bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50";
+                                row.className = "flex justify-between items-center bg-black p-4 rounded-2xl border border-zinc-800";
                                 row.innerHTML = `
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-[9px] bg-orange-500 text-black px-2 py-0.5 rounded font-black uppercase">${dia}</span>
-                                            <span class="text-[10px] font-bold text-white">${c.hora}</span>
-                                        </div>
-                                        <p class="text-sm font-bold text-zinc-100">${c.cliente}</p>
-                                        <a href="https://wa.me/${c.tel}" class="text-[10px] text-zinc-500 underline">WhatsApp: ${c.tel}</a>
+                                    <div>
+                                        <p class="text-[9px] text-orange-500 font-bold uppercase">${dia} - ${c.hora}</p>
+                                        <p class="text-sm font-bold text-white">${c.cliente}</p>
+                                        <p class="text-[10px] text-zinc-500">${c.tel}</p>
                                     </div>
-                                    <button onclick="liberar('${dia}', '${barber}', '${timeKey}')" class="ml-4 bg-red-950/30 text-red-500 text-[9px] px-4 py-2 rounded-xl font-bold border border-red-900/20 hover:bg-red-500 hover:text-white transition-all">
-                                        LIBERAR
-                                    </button>
+                                    <button onclick="eliminar('${dia}','${barber}','${key}')" class="text-red-500 text-[10px] font-bold">LIBERAR</button>
                                 `;
                                 list.appendChild(row);
                             });
                         }
                     });
 
-                    if(!hasCitas) {
-                        list.innerHTML = `<p class="text-[10px] text-zinc-700 italic py-2">Sin citas agendadas</p>`;
-                    }
-                    
-                    section.appendChild(list);
-                    container.appendChild(section);
+                    if(!hayCitas) list.innerHTML = `<p class="text-[10px] text-zinc-800 italic">Agenda vacía</p>`;
+                    card.appendChild(list);
+                    container.appendChild(card);
                 });
             });
         }
 
-        function liberar(dia, barber, key) {
-            if(confirm(`¿Deseas eliminar la cita de las ${key} con ${barber}? El espacio volverá a estar disponible.`)) {
-                db.ref(`citas/${currentWeek}/${dia}/${barber}/${key}`).remove()
-                .then(() => alert("Cita liberada correctamente."))
-                .catch(err => alert("Error al liberar: " + err));
+        function eliminar(dia, barber, key) {
+            if(confirm("¿Borrar cita?")) {
+                db.ref(`citas/${currentWeek}/${dia}/${barber}/${key}`).remove();
             }
         }
-
-        loadAdmin();
     </script>
 </body>
 </html>
