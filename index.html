@@ -13,8 +13,10 @@
         .gothic { font-family: 'UnifrakturMaguntia', cursive; }
         .slot-booked { background-color: #18181b; color: #3f3f46; cursor: not-allowed; text-decoration: line-through; border: 1px solid #27272a; }
         .slot-available { background-color: #fff; color: #000; cursor: pointer; border: 1px solid #fff; }
-        .day-btn { border: 1px solid #27272a; transition: all 0.2s; color: #555; }
-        .day-active { border-color: #fff; background-color: #fff !important; color: #000 !important; opacity: 1 !important; }
+        /* Estilo para días pasados (Gris oscuro, visible pero bloqueado) */
+        .day-past { background-color: #09090b !important; color: #27272a !important; border: 1px solid #18181b !important; text-decoration: line-through; opacity: 0.5; cursor: not-allowed; }
+        .day-btn { border: 1px solid #27272a; transition: all 0.2s; color: #71717a; }
+        .day-active { border-color: #fff !important; background-color: #fff !important; color: #000 !important; }
         .hidden { display: none; }
     </style>
 </head>
@@ -40,16 +42,16 @@
 
             <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">2. Selecciona barbero</h2>
             <div id="barber-grid" class="grid grid-cols-2 gap-4 opacity-30 pointer-events-none transition-all">
-                <button onclick="selectBarber('Barbero 1')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <button id="barber-Barbero 1" onclick="selectBarber('Barbero 1')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 1</p>
                 </button>
-                <button onclick="selectBarber('Barbero 2')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <button id="barber-Barbero 2" onclick="selectBarber('Barbero 2')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 2</p>
                 </button>
-                <button onclick="selectBarber('Barbero 3')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <button id="barber-Barbero 3" onclick="selectBarber('Barbero 3')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 3</p>
                 </button>
-                <button onclick="selectBarber('Barbero 4')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <button id="barber-Barbero 4" onclick="selectBarber('Barbero 4')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 4</p>
                 </button>
             </div>
@@ -60,13 +62,12 @@
             <h2 id="selection-summary" class="text-lg font-bold mb-8 italic text-center uppercase"></h2>
             <div id="slots-container" class="grid grid-cols-3 gap-3"></div>
         </section>
-
         <section id="step-3" class="hidden">
             <h2 class="text-xs font-bold mb-8 text-center uppercase tracking-[0.3em] text-zinc-400">Tus datos</h2>
             <div class="space-y-4">
                 <p id="final-details" class="text-[10px] text-zinc-500 text-center uppercase mb-4"></p>
-                <input type="text" id="client-name" placeholder="Tu Nombre Completo" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
-                <input type="tel" id="client-phone" placeholder="WhatsApp (10 dígitos)" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
+                <input type="text" id="client-name" placeholder="Tu Nombre Completo" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white text-white">
+                <input type="tel" id="client-phone" placeholder="WhatsApp (10 dígitos)" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white text-white">
                 <button onclick="confirmBooking()" class="w-full bg-white text-black font-extrabold py-5 rounded-2xl uppercase text-[11px] tracking-widest">Agendar Cita</button>
             </div>
         </section>
@@ -100,14 +101,14 @@
 
         function bloquearDiasPasados() {
             const fechaActual = new Date();
-            let diaHoy = fechaActual.getDay() || 7;
+            let diaHoy = fechaActual.getDay() || 7; // 1=Lun, 7=Dom
             const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+            
             dias.forEach((dia, i) => {
                 const btn = document.getElementById(`btn-${dia}`);
                 if (btn && (i + 1) < diaHoy) {
                     btn.disabled = true;
-                    btn.style.opacity = "0.1";
-                    btn.style.cursor = "not-allowed";
+                    btn.classList.add('day-past'); // Aplicamos el estilo de "pasado"
                 }
             });
         }
@@ -120,14 +121,13 @@
             const grid = document.getElementById('barber-grid');
             grid.classList.remove('opacity-30', 'pointer-events-none');
 
-            // LIMPIAR ESCUCHA ANTERIOR PARA EVITAR ERRORES
-            db.ref(`config/descansos/${currentWeek}/${day}`).off();
-            
-            // ESCUCHAR BLOQUEOS EN TIEMPO REAL
+            // Escuchar bloqueos de descansos
             db.ref(`config/descansos/${currentWeek}/${day}`).on('value', (snapshot) => {
                 const descansos = snapshot.val() || {};
-                grid.querySelectorAll('button').forEach(btn => {
-                    const nombre = btn.querySelector('p').innerText.trim();
+                const barberos = ["Barbero 1", "Barbero 2", "Barbero 3", "Barbero 4"];
+                
+                barberos.forEach(nombre => {
+                    const btn = document.getElementById(`barber-${nombre}`);
                     if (descansos[nombre]) {
                         btn.disabled = true;
                         btn.style.opacity = "0.05";
@@ -141,56 +141,27 @@
             });
         }
 
-        function selectBarber(name) {
-            selectedBarber = name;
-            document.getElementById('selection-summary').innerText = `${selectedDay} con ${name}`;
-            renderSlots();
-            showStep(2);
-        }
-
-        function showStep(n) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`step-${n}`).classList.remove('hidden');
-        }
-
+        // ... (El resto de funciones selectBarber, showStep, renderSlots, confirmBooking se mantienen igual)
+        function selectBarber(name) { selectedBarber = name; document.getElementById('selection-summary').innerText = `${selectedDay} con ${name}`; renderSlots(); showStep(2); }
+        function showStep(n) { document.querySelectorAll('section').forEach(s => s.classList.add('hidden')); document.getElementById(`step-${n}`).classList.remove('hidden'); }
         function renderSlots() {
             const container = document.getElementById('slots-container');
-            const hours = (selectedDay === 'Domingo') 
-                ? ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM"]
-                : ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM"];
-
+            const hours = (selectedDay === 'Domingo') ? ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM"] : ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM"];
             db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}`).on('value', (snapshot) => {
-                const booked = snapshot.val() || {};
-                container.innerHTML = "";
+                const booked = snapshot.val() || {}; container.innerHTML = "";
                 hours.forEach(t => {
-                    const key = t.replace(/[: ]/g, '');
-                    const isBooked = booked[key];
-                    const div = document.createElement('div');
-                    div.className = `p-4 text-[10px] font-bold rounded-xl text-center ${isBooked ? 'slot-booked' : 'slot-available'}`;
-                    div.innerText = t;
-                    if(!isBooked) div.onclick = () => { 
-                        selectedTime = t; 
-                        document.getElementById('final-details').innerText = `${selectedDay} - ${selectedTime}`;
-                        showStep(3); 
-                    };
+                    const key = t.replace(/[: ]/g, ''); const isBooked = booked[key];
+                    const div = document.createElement('div'); div.className = `p-4 text-[10px] font-bold rounded-xl text-center ${isBooked ? 'slot-booked' : 'slot-available'}`;
+                    div.innerText = t; if(!isBooked) div.onclick = () => { selectedTime = t; document.getElementById('final-details').innerText = `${selectedDay} - ${selectedTime}`; showStep(3); };
                     container.appendChild(div);
                 });
             });
         }
-
         function confirmBooking() {
-            const name = document.getElementById('client-name').value;
-            const phone = document.getElementById('client-phone').value;
-            if(!name || !phone) return alert("Faltan datos");
-            const key = selectedTime.replace(/[: ]/g, '');
-            db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}/${key}`).set({
-                cliente: name, tel: phone, hora: selectedTime
-            }).then(() => {
-                alert("¡Cita agendada!");
-                location.reload();
-            });
+            const name = document.getElementById('client-name').value; const phone = document.getElementById('client-phone').value;
+            if(!name || !phone) return alert("Faltan datos"); const key = selectedTime.replace(/[: ]/g, '');
+            db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}/${key}`).set({ cliente: name, tel: phone, hora: selectedTime }).then(() => { alert("¡Cita agendada!"); location.reload(); });
         }
-
         window.onload = bloquearDiasPasados;
     </script>
 </body>

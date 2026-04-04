@@ -3,50 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bronx Admin | Panel</title>
+    <title>Bronx Admin | Panel de Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .oculto { display: none !important; }
+        .card-barbero { background: #0a0a0a; border: 1px solid #1a1a1a; transition: all 0.3s; }
+        input:focus { border-color: #f97316 !important; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
     </style>
 </head>
 <body class="p-4 pb-20">
 
     <div id="seccion-login" class="fixed inset-0 bg-black flex flex-col items-center justify-center p-6 z-50">
-        <h1 class="text-4xl font-black italic mb-8 tracking-tighter uppercase text-white">Bronx <span class="text-orange-500">Admin</span></h1>
+        <h1 class="text-4xl font-black italic mb-8 tracking-tighter uppercase text-white text-center leading-none">Bronx<br><span class="text-orange-500 text-6xl">Admin</span></h1>
         <div class="w-full max-w-xs space-y-4 text-center">
-            <input type="password" id="input-password" placeholder="Código" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-center text-white outline-none focus:border-orange-500">
-            <button onclick="validarPassword()" class="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[11px] tracking-widest">Entrar</button>
-            <p id="error-msg" class="text-red-600 text-[10px] font-black oculto uppercase">Acceso Denegado</p>
+            <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-[0.2em]">Introduzca Código de Acceso</p>
+            <input type="password" id="input-password" placeholder="••••••••" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-center text-lg outline-none text-white font-mono">
+            <button onclick="validarPassword()" class="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[11px] tracking-widest active:scale-95 transition-all">Entrar al Sistema</button>
+            <p id="error-msg" class="text-red-600 text-[10px] font-black oculto uppercase tracking-widest">Acceso Denegado</p>
         </div>
     </div>
 
     <div id="seccion-admin" class="oculto">
         <header class="mb-10 border-b border-zinc-900 pb-6 flex justify-between items-end">
             <div>
-                <h1 class="text-2xl font-black italic uppercase tracking-tighter text-white">Panel <span class="text-orange-500">Bronx</span></h1>
+                <h1 class="text-2xl font-black italic uppercase tracking-tighter">Panel <span class="text-orange-500">Bronx</span></h1>
                 <p id="display-semana" class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1"></p>
             </div>
-            <button onclick="location.reload()" class="bg-zinc-900 text-zinc-500 text-[9px] font-black px-4 py-2 rounded-full border border-zinc-800 uppercase italic">Cerrar</button>
+            <button onclick="location.reload()" class="bg-zinc-900 text-zinc-500 text-[9px] font-black px-4 py-2 rounded-full border border-zinc-800 uppercase italic">Salir</button>
         </header>
 
         <section class="mb-10 bg-zinc-900/30 p-6 rounded-[2.5rem] border border-zinc-800">
-            <h2 class="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-5 text-center italic">Gestión de Descansos</h2>
+            <h2 class="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-5 text-center italic">Control de Descansos</h2>
             <div class="grid grid-cols-2 gap-3">
                 <select id="select-dia-descanso" class="bg-black border border-zinc-800 text-[10px] p-4 rounded-2xl text-white outline-none">
-                    <option value="Lunes">Lunes</option><option value="Martes">Martes</option><option value="Miercoles">Miércoles</option><option value="Jueves">Jueves</option><option value="Viernes">Viernes</option><option value="Sabado">Sábado</option><option value="Domingo">Domingo</option>
+                    <option value="Lunes">Lunes</option>
+                    <option value="Martes">Martes</option>
+                    <option value="Miercoles">Miércoles</option>
+                    <option value="Jueves">Jueves</option>
+                    <option value="Viernes">Viernes</option>
+                    <option value="Sabado">Sábado</option>
+                    <option value="Domingo">Domingo</option>
                 </select>
                 <select id="select-barber-descanso" class="bg-black border border-zinc-800 text-[10px] p-4 rounded-2xl text-white outline-none">
-                    <option value="Barbero 1">Barbero 1</option><option value="Barbero 2">Barbero 2</option><option value="Barbero 3">Barbero 3</option><option value="Barbero 4">Barbero 4</option>
+                    <option value="Barbero 1">Barbero 1</option>
+                    <option value="Barbero 2">Barbero 2</option>
+                    <option value="Barbero 3">Barbero 3</option>
+                    <option value="Barbero 4">Barbero 4</option>
                 </select>
                 <button onclick="toggleDescanso(true)" class="col-span-2 bg-red-600 text-white font-black py-4 rounded-2xl text-[9px] uppercase tracking-widest active:scale-95 transition-all">Bloquear Día</button>
-                <button onclick="toggleDescanso(false)" class="col-span-2 bg-zinc-800 text-zinc-400 font-black py-4 rounded-2xl text-[9px] uppercase tracking-widest active:scale-95 transition-all">Activar Barbero</button>
+                <button onclick="toggleDescanso(false)" class="col-span-2 bg-zinc-800 text-zinc-400 font-black py-4 rounded-2xl text-[9px] uppercase tracking-widest active:scale-95 transition-all italic">Activar Barbero</button>
             </div>
+
+            <div id="lista-descansos-activos" class="mt-6 flex flex-wrap gap-2 justify-center">
+                </div>
         </section>
 
-        <div id="contenedor-agendas" class="space-y-8"></div>
+        <div id="contenedor-agendas" class="space-y-8">
+            <p class="text-center text-zinc-700 text-xs animate-pulse">Sincronizando con la nube...</p>
+        </div>
     </div>
 
     <script>
@@ -60,6 +78,7 @@
             messagingSenderId: "674799529579",
             appId: "1:674799529579:web:813f9c27b2ee8f17e68b2e"
         };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -70,47 +89,64 @@
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
         const currentWeek = `2026-W${getWeekNumber()}`;
-        document.getElementById('display-semana').innerText = `SEMANA: ${currentWeek}`;
+        document.getElementById('display-semana').innerText = `GESTIÓN SEMANA: ${currentWeek}`;
 
         function validarPassword() {
             if(document.getElementById('input-password').value === PASSWORD_SISTEMA) {
                 document.getElementById('seccion-login').classList.add('oculto');
                 document.getElementById('seccion-admin').classList.remove('oculto');
                 arrancarAdmin();
+                mostrarBloqueosActivos();
             } else {
                 document.getElementById('error-msg').classList.remove('oculto');
+                document.getElementById('input-password').value = "";
             }
         }
 
+        // LÓGICA DE AGENDAS
         function arrancarAdmin() {
             const main = document.getElementById('contenedor-agendas');
             const barberos = ["Barbero 1", "Barbero 2", "Barbero 3", "Barbero 4"];
             const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+
             db.ref(`citas/${currentWeek}`).on('value', (snapshot) => {
                 main.innerHTML = "";
                 const data = snapshot.val() || {};
+
                 barberos.forEach(barber => {
                     const card = document.createElement('div');
-                    card.className = "bg-zinc-900/50 rounded-3xl p-6 border border-zinc-800";
-                    card.innerHTML = `<h2 class="text-[10px] font-black mb-5 text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2">${barber}</h2>`;
+                    card.className = "bg-zinc-900/50 rounded-[2.5rem] p-6 border border-zinc-800";
+                    card.innerHTML = `<h2 class="text-[10px] font-black mb-5 text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2 italic">${barber}</h2>`;
+                    
                     const list = document.createElement('div');
                     list.className = "space-y-3";
                     let hay = false;
+
                     dias.forEach(dia => {
                         const citas = data[dia] ? data[dia][barber] : null;
                         if(citas) {
                             Object.keys(citas).forEach(id => {
                                 hay = true;
                                 const c = citas[id];
-                                let num = c.tel.replace(/\D/g, ''); if(num.length === 10) num = "52"+num;
+                                let num = c.tel.replace(/\D/g, ''); 
+                                if(num.length === 10) num = "52" + num;
+
                                 const row = document.createElement('div');
                                 row.className = "flex justify-between items-center bg-black p-4 rounded-2xl border border-zinc-800";
-                                row.innerHTML = `<div><p class="text-[8px] text-orange-500 font-bold uppercase">${dia} - ${c.hora}</p><p class="text-sm font-bold text-white">${c.cliente}</p><a href="https://wa.me/${num}" target="_blank" class="text-[9px] text-green-500 font-bold uppercase underline mt-1 italic tracking-tighter">WhatsApp</a></div><button onclick="liberarCita('${dia}','${barber}','${id}')" class="text-red-500 text-[9px] font-black uppercase tracking-widest">Liberar</button>`;
+                                row.innerHTML = `
+                                    <div>
+                                        <p class="text-[8px] text-orange-500 font-bold uppercase">${dia} - ${c.hora}</p>
+                                        <p class="text-sm font-bold text-white leading-tight">${c.cliente}</p>
+                                        <a href="https://wa.me/${num}" target="_blank" class="text-[9px] text-green-500 font-bold uppercase underline mt-1 tracking-tighter">Confirmar WhatsApp</a>
+                                    </div>
+                                    <button onclick="liberarCita('${dia}','${barber}','${id}')" class="text-red-500 text-[9px] font-black uppercase tracking-widest">Liberar</button>
+                                `;
                                 list.appendChild(row);
                             });
                         }
                     });
-                    if(!hay) list.innerHTML = `<p class="text-[10px] text-zinc-800 italic text-center py-2">Sin citas</p>`;
+
+                    if(!hay) list.innerHTML = `<p class="text-[10px] text-zinc-800 italic text-center py-2">Agenda limpia</p>`;
                     card.appendChild(list);
                     main.appendChild(card);
                 });
@@ -118,19 +154,46 @@
         }
 
         function liberarCita(dia, barber, id) {
-            if(confirm("¿Borrar cita?")) db.ref(`citas/${currentWeek}/${dia}/${barber}/${id}`).remove();
+            if(confirm(`¿Liberar espacio de las ${id}?`)) {
+                db.ref(`citas/${currentWeek}/${dia}/${barber}/${id}`).remove();
+            }
         }
 
+        // LÓGICA DE DESCANSOS VISUALES
         function toggleDescanso(estado) {
             const dia = document.getElementById('select-dia-descanso').value;
             const barber = document.getElementById('select-barber-descanso').value;
             if (estado) {
                 db.ref(`config/descansos/${currentWeek}/${dia}/${barber}`).set(true)
-                .then(() => alert(`🚫 ${barber} bloqueado para el ${dia}`));
+                .then(() => alert(`🚫 ${barber} bloqueado el ${dia}`));
             } else {
                 db.ref(`config/descansos/${currentWeek}/${dia}/${barber}`).remove()
-                .then(() => alert(`✅ ${barber} activado para el ${dia}`));
+                .then(() => alert(`✅ ${barber} reactivado el ${dia}`));
             }
+        }
+
+        function mostrarBloqueosActivos() {
+            const contenedorDescansos = document.getElementById('lista-descansos-activos');
+            db.ref(`config/descansos/${currentWeek}`).on('value', (snapshot) => {
+                contenedorDescansos.innerHTML = "";
+                const data = snapshot.val() || {};
+                
+                Object.keys(data).forEach(dia => {
+                    Object.keys(data[dia]).forEach(barber => {
+                        const tag = document.createElement('div');
+                        tag.className = "bg-red-500/10 border border-red-500/20 text-red-500 text-[8px] font-black px-3 py-2 rounded-full uppercase flex items-center gap-2";
+                        tag.innerHTML = `
+                            <span>🚫 ${dia}: ${barber}</span>
+                            <button onclick="quitarBloqueoDirecto('${dia}', '${barber}')" class="hover:text-white ml-1">✕</button>
+                        `;
+                        contenedorDescansos.appendChild(tag);
+                    });
+                });
+            });
+        }
+
+        function quitarBloqueoDirecto(dia, barber) {
+            db.ref(`config/descansos/${currentWeek}/${dia}/${barber}`).remove();
         }
     </script>
 </body>
