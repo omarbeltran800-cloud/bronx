@@ -13,22 +13,21 @@
         .gothic { font-family: 'UnifrakturMaguntia', cursive; }
         .slot-booked { background-color: #18181b; color: #3f3f46; cursor: not-allowed; text-decoration: line-through; border: 1px solid #27272a; }
         .slot-available { background-color: #fff; color: #000; cursor: pointer; border: 1px solid #fff; }
-        .day-btn { border: 1px solid #27272a; transition: all 0.2s; }
-        .day-active { border-color: #fff; background-color: #fff; color: #000; }
+        .day-btn { border: 1px solid #27272a; transition: all 0.2s; color: #555; }
+        .day-active { border-color: #fff; background-color: #fff !important; color: #000 !important; opacity: 1 !important; }
         .hidden { display: none; }
     </style>
 </head>
 <body class="pb-10">
 
     <header class="py-10 text-center border-b border-zinc-900">
-        <h1 class="text-6xl gothic">B</h1>
+        <h1 class="text-6xl gothic text-white">B</h1>
         <p id="week-display" class="uppercase tracking-[0.3em] text-[9px] mt-3 font-bold text-zinc-500"></p>
     </header>
 
     <main class="max-w-md mx-auto p-6">
-        
         <section id="step-1">
-            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">1. Elige el día de esta semana</h2>
+            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">1. Elige el día</h2>
             <div class="grid grid-cols-4 gap-2 mb-8">
                 <button id="btn-Lunes" onclick="setDay('Lunes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Lun</button>
                 <button id="btn-Martes" onclick="setDay('Martes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mar</button>
@@ -39,8 +38,8 @@
                 <button id="btn-Domingo" onclick="setDay('Domingo')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase col-span-2">Dom</button>
             </div>
 
-            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">2. Selecciona a tu barbero</h2>
-            <div id="barber-grid" class="grid grid-cols-2 gap-4 opacity-30 pointer-events-none">
+            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">2. Selecciona barbero</h2>
+            <div id="barber-grid" class="grid grid-cols-2 gap-4 opacity-30 pointer-events-none transition-all">
                 <button onclick="selectBarber('Barbero 1')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 1</p>
                 </button>
@@ -67,15 +66,13 @@
             <div class="space-y-4">
                 <p id="final-details" class="text-[10px] text-zinc-500 text-center uppercase mb-4"></p>
                 <input type="text" id="client-name" placeholder="Tu Nombre Completo" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
-                <input type="tel" id="client-phone" placeholder="WhatsApp" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
+                <input type="tel" id="client-phone" placeholder="WhatsApp (10 dígitos)" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
                 <button onclick="confirmBooking()" class="w-full bg-white text-black font-extrabold py-5 rounded-2xl uppercase text-[11px] tracking-widest">Agendar Cita</button>
             </div>
         </section>
-
     </main>
 
     <script>
-        // CONFIGURACIÓN DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD16imBLTSC6YhiwKJK5PGza5g3a1N3J08",
             authDomain: "bronxbarber-d9cb3.firebaseapp.com",
@@ -85,7 +82,6 @@
             messagingSenderId: "674799529579",
             appId: "1:674799529579:web:813f9c27b2ee8f17e68b2e"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -93,75 +89,57 @@
         let selectedBarber = "";
         let selectedTime = "";
 
-        // BLOQUEAR DÍAS PASADOS
-        function bloquearDiasPasados() {
-            const fechaActual = new Date();
-            let diaHoy = fechaActual.getDay(); // 0=Dom, 1=Lun
-            if (diaHoy === 0) diaHoy = 7;
-
-            const diasSemana = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
-
-            diasSemana.forEach((dia, index) => {
-                const numeroDiaBtn = index + 1;
-                const boton = document.getElementById(`btn-${dia}`);
-                if (boton && numeroDiaBtn < diaHoy) {
-                    boton.disabled = true;
-                    boton.style.opacity = "0.2";
-                    boton.style.cursor = "not-allowed";
-                    boton.style.textDecoration = "line-through";
-                }
-            });
-        }
-
         function getWeekNumber() {
             const d = new Date(); d.setHours(0,0,0,0);
             d.setDate(d.getDate() + 4 - (d.getDay() || 7));
             const yearStart = new Date(d.getFullYear(),0,1);
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
-
         const currentWeek = `2026-W${getWeekNumber()}`;
         document.getElementById('week-display').innerText = `SEMANA: ${currentWeek}`;
 
-      function setDay(day) {
-    selectedDay = day;
-    
-    // 1. Quitamos el resaltado de todos y se lo ponemos al que picamos
-    document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('day-active'));
-    // Usamos el ID para asegurar que siempre agarramos el botón correcto
-    document.getElementById(`btn-${day}`).classList.add('day-active');
+        function bloquearDiasPasados() {
+            const fechaActual = new Date();
+            let diaHoy = fechaActual.getDay() || 7;
+            const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+            dias.forEach((dia, i) => {
+                const btn = document.getElementById(`btn-${dia}`);
+                if (btn && (i + 1) < diaHoy) {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.1";
+                    btn.style.cursor = "not-allowed";
+                }
+            });
+        }
 
-    const grid = document.getElementById('barber-grid');
-    grid.classList.remove('opacity-30', 'pointer-events-none');
-
-    // 2. IMPORTANTE: Apagamos cualquier oreja anterior para que no se amontonen
-    db.ref(`config/descansos/${currentWeek}`).off();
-
-    // 3. Escuchamos quién descansa este día
-    db.ref(`config/descansos/${currentWeek}/${day}`).on('value', (snapshot) => {
-        const descansos = snapshot.val() || {};
-        const botonesBarberos = grid.querySelectorAll('button');
-        
-        botonesBarberos.forEach(btn => {
-            // .trim() quita espacios accidentales que rompen la comparación
-            const nombreBarber = btn.querySelector('p').innerText.trim();
+        function setDay(day) {
+            selectedDay = day;
+            document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('day-active'));
+            document.getElementById(`btn-${day}`).classList.add('day-active');
             
-            if (descansos[nombreBarber]) {
-                // BLOQUEADO
-                btn.disabled = true;
-                btn.style.opacity = "0.1";
-                btn.style.filter = "grayscale(100%)";
-                btn.style.cursor = "not-allowed";
-            } else {
-                // ACTIVO (Esto es lo que hace que el "desbloqueo" se vea al instante)
-                btn.disabled = false;
-                btn.style.opacity = "1";
-                btn.style.filter = "none";
-                btn.style.cursor = "pointer";
-            }
-        });
-    });
-}
+            const grid = document.getElementById('barber-grid');
+            grid.classList.remove('opacity-30', 'pointer-events-none');
+
+            // LIMPIAR ESCUCHA ANTERIOR PARA EVITAR ERRORES
+            db.ref(`config/descansos/${currentWeek}/${day}`).off();
+            
+            // ESCUCHAR BLOQUEOS EN TIEMPO REAL
+            db.ref(`config/descansos/${currentWeek}/${day}`).on('value', (snapshot) => {
+                const descansos = snapshot.val() || {};
+                grid.querySelectorAll('button').forEach(btn => {
+                    const nombre = btn.querySelector('p').innerText.trim();
+                    if (descansos[nombre]) {
+                        btn.disabled = true;
+                        btn.style.opacity = "0.05";
+                        btn.style.filter = "grayscale(100%)";
+                    } else {
+                        btn.disabled = false;
+                        btn.style.opacity = "1";
+                        btn.style.filter = "none";
+                    }
+                });
+            });
+        }
 
         function selectBarber(name) {
             selectedBarber = name;
@@ -213,10 +191,7 @@
             });
         }
 
-        // CORRER AL CARGAR
-        window.onload = () => {
-            bloquearDiasPasados();
-        };
+        window.onload = bloquearDiasPasados;
     </script>
 </body>
 </html>
