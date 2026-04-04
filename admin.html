@@ -34,6 +34,28 @@
             </div>
             <button onclick="location.reload()" class="bg-zinc-900 text-zinc-500 text-[9px] font-black px-4 py-2 rounded-full border border-zinc-800 uppercase">Cerrar Sesión</button>
         </header>
+        <section class="mb-10 bg-zinc-900/30 p-6 rounded-[2.5rem] border border-zinc-800">
+            <h2 class="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-5 text-center">Gestión de Descansos</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <select id="select-dia-descanso" class="bg-black border border-zinc-800 text-[10px] p-4 rounded-2xl outline-none text-white appearance-none">
+                    <option value="Lunes">Lunes</option>
+                    <option value="Martes">Martes</option>
+                    <option value="Miercoles">Miércoles</option>
+                    <option value="Jueves">Jueves</option>
+                    <option value="Viernes">Viernes</option>
+                    <option value="Sabado">Sábado</option>
+                    <option value="Domingo">Domingo</option>
+                </select>
+                <select id="select-barber-descanso" class="bg-black border border-zinc-800 text-[10px] p-4 rounded-2xl outline-none text-white appearance-none">
+                    <option value="Barbero 1">Barbero 1</option>
+                    <option value="Barbero 2">Barbero 2</option>
+                    <option value="Barbero 3">Barbero 3</option>
+                    <option value="Barbero 4">Barbero 4</option>
+                </select>
+                <button onclick="toggleDescanso(true)" class="col-span-2 bg-red-600 text-white font-black py-4 rounded-2xl text-[9px] uppercase tracking-widest active:scale-95 transition-all">Bloquear Día (Descanso)</button>
+                <button onclick="toggleDescanso(false)" class="col-span-2 bg-zinc-800 text-zinc-500 font-black py-4 rounded-2xl text-[9px] uppercase tracking-widest active:scale-95 transition-all">Quitar Bloqueo / Activar</button>
+            </div>
+        </section>
 
         <div id="contenedor-agendas" class="space-y-8">
             <p class="text-center text-zinc-700 text-xs animate-pulse">Sincronizando con la nube...</p>
@@ -151,7 +173,22 @@
                 db.ref(`citas/${currentWeek}/${dia}/${barbero}/${id}`).remove()
                 .catch(err => alert("Error: " + err));
             }
+        }// <--- Esta cierra liberarCita
+        // --- FUNCIÓN PARA BLOQUEAR/DESBLOQUEAR BARBEROS ---
+        function toggleDescanso(estado) {
+            const dia = document.getElementById('select-dia-descanso').value;
+            const barber = document.getElementById('select-barber-descanso').value;
+            
+            if (estado) {
+                // Guarda el bloqueo en la nube
+                db.ref(`config/descansos/${currentWeek}/${dia}/${barber}`).set(true)
+                .then(() => alert(`✅ ${barber} bloqueado para el ${dia}`));
+            } else {
+                // Quita el bloqueo
+                db.ref(`config/descansos/${currentWeek}/${dia}/${barber}`).remove()
+                .then(() => alert(`✨ ${barber} activado nuevamente para el ${dia}`));
+            }
         }
-    </script>
+    </script> 
 </body>
 </html>
