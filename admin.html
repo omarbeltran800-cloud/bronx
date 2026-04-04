@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bronx Admin | Panel de Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .barber-card { background: #0a0a0a; border: 1px solid #1a1a1a; }
+    </style>
+</head>
+<body class="p-4 pb-20">
+
+    <header class="mb-8 border-b border-zinc-900 pb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-xl font-black italic uppercase tracking-tighter text-white">Bronx <span class="text-orange-500">Admin</span></h1>
+            <p id="week-label" class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1"></p>
+        </div>
+        <div class="bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
+            <span class="text-[10px] font-bold text-green-500 animate-pulse">● EN VIVO</span>
+        </div>
+    </header>
+
+    <div id="admin-content" class="space-y-6">
+        <p class="text-center text-zinc-600 text-xs animate-pulse">Conectando con la base de datos...</p>
+    </div>
+
+    <script>
+        // TUS CREDENCIALES (Iguales a las del index)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD16imBLTSC6YhiwKJK5PGza5g3a1N3J08",
+            authDomain: "bronxbarber-d9cb3.firebaseapp.com",
+            databaseURL: "https://bronxbarber-d9cb3-default-rtdb.firebaseio.com",
+            projectId: "bronxbarber-d9cb3",
+            storageBucket: "bronxbarber-d9cb3.firebasestorage.app",
+            messagingSenderId: "674799529579",
+            appId: "1:674799529579:web:813f9c27b2ee8f17e68b2e"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Lógica de semana (Igual al index para estar sincronizados)
+        function getWeekNumber() {
+            const d = new Date(); d.setHours(0,0,0,0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(),0,1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        const currentWeek = `2026-W${getWeekNumber()}`;
+        document.getElementById('week-label').innerText = `SEMANA ACTUAL: ${currentWeek}`;
+
+        const barberos = ["Barbero 1", "Barbero 2", "Barbero 3", "Barbero 4"];
+        const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+
+        function loadAdmin() {
+            const container = document.getElementById('admin-content');
+            
+            // Escuchar TODAS las citas de la semana actual
+            db.ref(`citas/${currentWeek}`).on('value', (snapshot) => {
+                container.innerHTML = "";
+                const weekData = snapshot.val() || {};
+
+                barberos.forEach(barber => {
+                    const section = document.createElement('div');
+                    section.className = "barber-card rounded-3xl p-5 mb-4";
+                    section.innerHTML = `<h2 class="text-xs font-black mb-4 text-zinc-400 uppercase tracking-[0.2em]">${barber}</h2>`;
+                    
+                    const list = document.createElement('div');
+                    list.className = "space-y-3";
+
+                    let hasCitas = false;
+
+                    dias.forEach(dia => {
+                        const dayCitas = weekData[dia] ? weekData[dia][barber] : null;
+                        if(dayCitas) {
+                            Object.keys(dayCitas).forEach(timeKey => {
+                                hasCitas = true;
+                                const c = dayCitas[timeKey];
+                                const row = document.createElement('div');
+                                row.className = "flex justify-between items-center bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50";
+                                row.innerHTML = `
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-[9px] bg-orange-500 text-black px-2 py-0.5 rounded font-black uppercase">${dia}</span>
+                                            <span class="text-[10px] font-bold text-white">${c.hora}</span>
+                                        </div>
+                                        <p class="text-sm font-bold text-zinc-100">${c.cliente}</p>
+                                        <a href="https://wa.me/${c.tel}" class="text-[10px] text-zinc-500 underline">WhatsApp: ${c.tel}</a>
+                                    </div>
+                                    <button onclick="liberar('${dia}', '${barber}', '${timeKey}')" class="ml-4 bg-red-950/30 text-red-500 text-[9px] px-4 py-2 rounded-xl font-bold border border-red-900/20 hover:bg-red-500 hover:text-white transition-all">
+                                        LIBERAR
+                                    </button>
+                                `;
+                                list.appendChild(row);
+                            });
+                        }
+                    });
+
+                    if(!hasCitas) {
+                        list.innerHTML = `<p class="text-[10px] text-zinc-700 italic py-2">Sin citas agendadas</p>`;
+                    }
+                    
+                    section.appendChild(list);
+                    container.appendChild(section);
+                });
+            });
+        }
+
+        function liberar(dia, barber, key) {
+            if(confirm(`¿Deseas eliminar la cita de las ${key} con ${barber}? El espacio volverá a estar disponible.`)) {
+                db.ref(`citas/${currentWeek}/${dia}/${barber}/${key}`).remove()
+                .then(() => alert("Cita liberada correctamente."))
+                .catch(err => alert("Error al liberar: " + err));
+            }
+        }
+
+        loadAdmin();
+    </script>
+</body>
+</html>
