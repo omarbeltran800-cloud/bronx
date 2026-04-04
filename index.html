@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bronx Barber Studio | Agenda Semanal</title>
+    <title>Bronx Barber Studio | Citas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -30,57 +30,52 @@
         <section id="step-1">
             <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">1. Elige el día de esta semana</h2>
             <div class="grid grid-cols-4 gap-2 mb-8">
-                <button onclick="setDay('Lunes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Lun</button>
-                <button onclick="setDay('Martes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mar</button>
-                <button onclick="setDay('Miercoles')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mie</button>
-                <button onclick="setDay('Jueves')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Jue</button>
-                <button onclick="setDay('Viernes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Vie</button>
-                <button onclick="setDay('Sabado')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Sab</button>
-                <button onclick="setDay('Domingo')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase col-span-2">Dom</button>
+                <button id="btn-Lunes" onclick="setDay('Lunes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Lun</button>
+                <button id="btn-Martes" onclick="setDay('Martes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mar</button>
+                <button id="btn-Miercoles" onclick="setDay('Miercoles')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mie</button>
+                <button id="btn-Jueves" onclick="setDay('Jueves')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Jue</button>
+                <button id="btn-Viernes" onclick="setDay('Viernes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Vie</button>
+                <button id="btn-Sabado" onclick="setDay('Sabado')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Sab</button>
+                <button id="btn-Domingo" onclick="setDay('Domingo')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase col-span-2">Dom</button>
             </div>
 
             <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">2. Selecciona a tu barbero</h2>
             <div id="barber-grid" class="grid grid-cols-2 gap-4 opacity-30 pointer-events-none">
-                <button onclick="selectBarber('Barbero 1')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800 hover:border-white transition-all">
-                    <div class="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-3"></div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-300">Barbero 1</p>
+                <button onclick="selectBarber('Barbero 1')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                    <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 1</p>
                 </button>
-                <button onclick="selectBarber('Barbero 2')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800 hover:border-white transition-all">
-                    <div class="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-3"></div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-300">Barbero 2</p>
+                <button onclick="selectBarber('Barbero 2')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                    <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 2</p>
                 </button>
-                <button onclick="selectBarber('Barbero 3')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800 hover:border-white transition-all">
-                    <div class="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-3"></div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-300">Barbero 3</p>
+                <button onclick="selectBarber('Barbero 3')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                    <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 3</p>
                 </button>
-                <button onclick="selectBarber('Barbero 4')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800 hover:border-white transition-all">
-                    <div class="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-3"></div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-300">Barbero 4</p>
+                <button onclick="selectBarber('Barbero 4')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                    <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 4</p>
                 </button>
             </div>
         </section>
 
         <section id="step-2" class="hidden">
             <button onclick="showStep(1)" class="text-zinc-500 text-[10px] mb-6 uppercase font-bold tracking-widest">← Volver</button>
-            <h2 id="selection-summary" class="text-lg font-bold mb-8 italic text-center uppercase border-b border-zinc-900 pb-4"></h2>
+            <h2 id="selection-summary" class="text-lg font-bold mb-8 italic text-center uppercase"></h2>
             <div id="slots-container" class="grid grid-cols-3 gap-3"></div>
         </section>
 
         <section id="step-3" class="hidden">
-            <button onclick="showStep(2)" class="text-zinc-500 text-[10px] mb-6 uppercase font-bold tracking-widest">← Cambiar hora</button>
             <h2 class="text-xs font-bold mb-8 text-center uppercase tracking-[0.3em] text-zinc-400">Tus datos</h2>
             <div class="space-y-4">
                 <p id="final-details" class="text-[10px] text-zinc-500 text-center uppercase mb-4"></p>
                 <input type="text" id="client-name" placeholder="Tu Nombre Completo" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
                 <input type="tel" id="client-phone" placeholder="WhatsApp" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white">
-                <button onclick="confirmBooking()" class="w-full bg-white text-black font-extrabold py-5 rounded-2xl uppercase text-[11px] tracking-widest active:scale-95 transition-all">Agendar Cita</button>
+                <button onclick="confirmBooking()" class="w-full bg-white text-black font-extrabold py-5 rounded-2xl uppercase text-[11px] tracking-widest">Agendar Cita</button>
             </div>
         </section>
 
     </main>
 
     <script>
-        // CONFIGURACIÓN DE FIREBASE (TU DATA)
+        // CONFIGURACIÓN DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyD16imBLTSC6YhiwKJK5PGza5g3a1N3J08",
             authDomain: "bronxbarber-d9cb3.firebaseapp.com",
@@ -98,22 +93,35 @@
         let selectedBarber = "";
         let selectedTime = "";
 
+        // BLOQUEAR DÍAS PASADOS
+        function bloquearDiasPasados() {
+            const fechaActual = new Date();
+            let diaHoy = fechaActual.getDay(); // 0=Dom, 1=Lun
+            if (diaHoy === 0) diaHoy = 7;
+
+            const diasSemana = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+
+            diasSemana.forEach((dia, index) => {
+                const numeroDiaBtn = index + 1;
+                const boton = document.getElementById(`btn-${dia}`);
+                if (boton && numeroDiaBtn < diaHoy) {
+                    boton.disabled = true;
+                    boton.style.opacity = "0.2";
+                    boton.style.cursor = "not-allowed";
+                    boton.style.textDecoration = "line-through";
+                }
+            });
+        }
+
         function getWeekNumber() {
-            const d = new Date();
-            d.setHours(0, 0, 0, 0);
+            const d = new Date(); d.setHours(0,0,0,0);
             d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-            const yearStart = new Date(d.getFullYear(), 0, 1);
+            const yearStart = new Date(d.getFullYear(),0,1);
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
 
         const currentWeek = `2026-W${getWeekNumber()}`;
         document.getElementById('week-display').innerText = `SEMANA: ${currentWeek}`;
-
-        function showStep(n) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`step-${n}`).classList.remove('hidden');
-            window.scrollTo(0,0);
-        }
 
         function setDay(day) {
             selectedDay = day;
@@ -124,15 +132,18 @@
 
         function selectBarber(name) {
             selectedBarber = name;
-            document.getElementById('selection-summary').innerText = `${selectedDay} - ${name}`;
+            document.getElementById('selection-summary').innerText = `${selectedDay} con ${name}`;
             renderSlots();
             showStep(2);
         }
 
+        function showStep(n) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step-${n}`).classList.remove('hidden');
+        }
+
         function renderSlots() {
             const container = document.getElementById('slots-container');
-            container.innerHTML = `<p class="col-span-3 text-center text-[10px] text-zinc-600">Actualizando agenda...</p>`;
-            
             const hours = (selectedDay === 'Domingo') 
                 ? ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM"]
                 : ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM"];
@@ -148,7 +159,7 @@
                     div.innerText = t;
                     if(!isBooked) div.onclick = () => { 
                         selectedTime = t; 
-                        document.getElementById('final-details').innerText = `${selectedDay} a las ${selectedTime} con ${selectedBarber}`;
+                        document.getElementById('final-details').innerText = `${selectedDay} - ${selectedTime}`;
                         showStep(3); 
                     };
                     container.appendChild(div);
@@ -159,16 +170,20 @@
         function confirmBooking() {
             const name = document.getElementById('client-name').value;
             const phone = document.getElementById('client-phone').value;
-            if(!name || !phone) return alert("Pon tus datos completo, bro.");
-
+            if(!name || !phone) return alert("Faltan datos");
             const key = selectedTime.replace(/[: ]/g, '');
             db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}/${key}`).set({
                 cliente: name, tel: phone, hora: selectedTime
             }).then(() => {
-                alert("¡Excelente! Cita confirmada en Bronx Barber Studio.");
+                alert("¡Cita agendada!");
                 location.reload();
             });
         }
+
+        // CORRER AL CARGAR
+        window.onload = () => {
+            bloquearDiasPasados();
+        };
     </script>
 </body>
 </html>
