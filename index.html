@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,63 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Inter:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
-        .gothic { font-family: 'UnifrakturMaguntia', cursive; }
-        .slot-booked { background-color: #18181b; color: #3f3f46; cursor: not-allowed; text-decoration: line-through; border: 1px solid #27272a; }
-        .slot-available { background-color: #fff; color: #000; cursor: pointer; border: 1px solid #fff; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .gothic {
+            font-family: 'UnifrakturMaguntia', cursive;
+        }
+
+        .slot-booked {
+            background-color: #18181b;
+            color: #3f3f46;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            border: 1px solid #27272a;
+        }
+
+        .slot-available {
+            background-color: #fff;
+            color: #000;
+            cursor: pointer;
+            border: 1px solid #fff;
+        }
+
         /* Estilo para días pasados (Gris oscuro, visible pero bloqueado) */
-        .day-past { background-color: #09090b !important; color: #27272a !important; border: 1px solid #18181b !important; text-decoration: line-through; opacity: 0.5; cursor: not-allowed; }
-        .day-btn { border: 1px solid #27272a; transition: all 0.2s; color: #71717a; }
-        .day-active { border-color: #fff !important; background-color: #fff !important; color: #000 !important; }
-        .hidden { display: none; }
+        .day-past {
+            background-color: #09090b !important;
+            color: #27272a !important;
+            border: 1px solid #18181b !important;
+            text-decoration: line-through;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .day-btn {
+            border: 1px solid #27272a;
+            transition: all 0.2s;
+            color: #71717a;
+        }
+
+        .day-active {
+            border-color: #fff !important;
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
+
 <body class="pb-10">
 
     <header class="py-10 text-center border-b border-zinc-900">
@@ -29,36 +74,50 @@
 
     <main class="max-w-md mx-auto p-6">
         <section id="step-1">
-            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">1. Elige el día</h2>
+            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">1. Elige
+                el día</h2>
             <div class="grid grid-cols-4 gap-2 mb-8">
-                <button id="btn-Lunes" onclick="setDay('Lunes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Lun</button>
-                <button id="btn-Martes" onclick="setDay('Martes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mar</button>
-                <button id="btn-Miercoles" onclick="setDay('Miercoles')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mie</button>
-                <button id="btn-Jueves" onclick="setDay('Jueves')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Jue</button>
-                <button id="btn-Viernes" onclick="setDay('Viernes')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Vie</button>
-                <button id="btn-Sabado" onclick="setDay('Sabado')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Sab</button>
-                <button id="btn-Domingo" onclick="setDay('Domingo')" class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase col-span-2">Dom</button>
+                <button id="btn-Lunes" onclick="setDay('Lunes')"
+                    class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Lun</button>
+                <button id="btn-Martes" onclick="setDay('Martes')"
+                    class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mar</button>
+                <button id="btn-Miercoles" onclick="setDay('Miercoles')"
+                    class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Mie</button>
+                <button id="btn-Jueves" onclick="setDay('Jueves')"
+                    class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Jue</button>
+                <button id="btn-Viernes" onclick="setDay('Viernes')"
+                    class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Vie</button>
+                <button id="btn-Sabado" onclick="setDay('Sabado')"
+                    class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase">Sab</button>
+                <button id="btn-Domingo" onclick="setDay('Domingo')"
+                    class="day-btn p-3 rounded-xl text-[10px] font-bold uppercase col-span-2">Dom</button>
             </div>
 
-            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">2. Selecciona barbero</h2>
+            <h2 class="text-zinc-500 text-[10px] uppercase font-bold mb-6 tracking-widest text-center italic">2.
+                Selecciona barbero</h2>
             <div id="barber-grid" class="grid grid-cols-2 gap-4 opacity-30 pointer-events-none transition-all">
-                <button id="barber-Barbero 1" onclick="selectBarber('Barbero 1')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <button id="barber-Barbero 1" onclick="selectBarber('Barbero 1')"
+                    class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 1</p>
                 </button>
-                <button id="barber-Barbero 2" onclick="selectBarber('Barbero 2')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <button id="barber-Barbero 2" onclick="selectBarber('Barbero 2')"
+                    class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 2</p>
                 </button>
-                <button id="barber-Barbero 3" onclick="selectBarber('Barbero 3')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <button id="barber-Barbero 3" onclick="selectBarber('Barbero 3')"
+                    class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 3</p>
                 </button>
-                <button id="barber-Barbero 4" onclick="selectBarber('Barbero 4')" class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <button id="barber-Barbero 4" onclick="selectBarber('Barbero 4')"
+                    class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
                     <p class="text-[10px] font-bold uppercase tracking-widest">Barbero 4</p>
                 </button>
             </div>
         </section>
 
         <section id="step-2" class="hidden">
-            <button onclick="showStep(1)" class="text-zinc-500 text-[10px] mb-6 uppercase font-bold tracking-widest">← Volver</button>
+            <button onclick="showStep(1)" class="text-zinc-500 text-[10px] mb-6 uppercase font-bold tracking-widest">←
+                Volver</button>
             <h2 id="selection-summary" class="text-lg font-bold mb-8 italic text-center uppercase"></h2>
             <div id="slots-container" class="grid grid-cols-3 gap-3"></div>
         </section>
@@ -66,14 +125,21 @@
             <h2 class="text-xs font-bold mb-8 text-center uppercase tracking-[0.3em] text-zinc-400">Tus datos</h2>
             <div class="space-y-4">
                 <p id="final-details" class="text-[10px] text-zinc-500 text-center uppercase mb-4"></p>
-                <input type="text" id="client-name" placeholder="Tu Nombre Completo" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white text-white">
-                <input type="tel" id="client-phone" placeholder="WhatsApp (10 dígitos)" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white text-white">
-                <button onclick="confirmBooking()" class="w-full bg-white text-black font-extrabold py-5 rounded-2xl uppercase text-[11px] tracking-widest">Agendar Cita</button>
+                <input type="text" id="client-name" placeholder="Tu Nombre Completo"
+                    class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white text-white">
+                <input type="tel" id="client-phone" placeholder="WhatsApp (10 dígitos)"
+                    class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-sm outline-none focus:border-white text-white">
+                <button onclick="confirmBooking()"
+                    class="w-full bg-white text-black font-extrabold py-5 rounded-2xl uppercase text-[11px] tracking-widest">Agendar
+                    Cita</button>
             </div>
         </section>
     </main>
 
     <script>
+        (function () {
+            emailjs.init("rfme4RJ4P0pWO-5pa"); // <--- PEGA TU LLAVE AQUÍ
+        })();
         const firebaseConfig = {
             apiKey: "AIzaSyD16imBLTSC6YhiwKJK5PGza5g3a1N3J08",
             authDomain: "bronxbarber-d9cb3.firebaseapp.com",
@@ -91,9 +157,9 @@
         let selectedTime = "";
 
         function getWeekNumber() {
-            const d = new Date(); d.setHours(0,0,0,0);
+            const d = new Date(); d.setHours(0, 0, 0, 0);
             d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-            const yearStart = new Date(d.getFullYear(),0,1);
+            const yearStart = new Date(d.getFullYear(), 0, 1);
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
         const currentWeek = `2026-W${getWeekNumber()}`;
@@ -103,7 +169,7 @@
             const fechaActual = new Date();
             let diaHoy = fechaActual.getDay() || 7; // 1=Lun, 7=Dom
             const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
-            
+
             dias.forEach((dia, i) => {
                 const btn = document.getElementById(`btn-${dia}`);
                 if (btn && (i + 1) < diaHoy) {
@@ -117,15 +183,15 @@
             selectedDay = day;
             document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('day-active'));
             document.getElementById(`btn-${day}`).classList.add('day-active');
-            
+
             const grid = document.getElementById('barber-grid');
             grid.classList.remove('opacity-30', 'pointer-events-none');
 
             // Escuchar bloqueos de descansos
-            db.ref(`config/descansos/${currentWeek}/${day}`).on('value', (snapshot) => {
+            db.ref(`config/descansos/${currentWeek}/${day}`).once('value', (snapshot) => {
                 const descansos = snapshot.val() || {};
                 const barberos = ["Barbero 1", "Barbero 2", "Barbero 3", "Barbero 4"];
-                
+
                 barberos.forEach(nombre => {
                     const btn = document.getElementById(`barber-${nombre}`);
                     if (descansos[nombre]) {
@@ -141,28 +207,73 @@
             });
         }
 
-        // ... (El resto de funciones selectBarber, showStep, renderSlots, confirmBooking se mantienen igual)
+
         function selectBarber(name) { selectedBarber = name; document.getElementById('selection-summary').innerText = `${selectedDay} con ${name}`; renderSlots(); showStep(2); }
         function showStep(n) { document.querySelectorAll('section').forEach(s => s.classList.add('hidden')); document.getElementById(`step-${n}`).classList.remove('hidden'); }
         function renderSlots() {
             const container = document.getElementById('slots-container');
             const hours = (selectedDay === 'Domingo') ? ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM"] : ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM"];
-            db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}`).on('value', (snapshot) => {
+            db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}`).once('value', (snapshot) => {
                 const booked = snapshot.val() || {}; container.innerHTML = "";
                 hours.forEach(t => {
                     const key = t.replace(/[: ]/g, ''); const isBooked = booked[key];
                     const div = document.createElement('div'); div.className = `p-4 text-[10px] font-bold rounded-xl text-center ${isBooked ? 'slot-booked' : 'slot-available'}`;
-                    div.innerText = t; if(!isBooked) div.onclick = () => { selectedTime = t; document.getElementById('final-details').innerText = `${selectedDay} - ${selectedTime}`; showStep(3); };
+                    div.innerText = t; if (!isBooked) div.onclick = () => { selectedTime = t; document.getElementById('final-details').innerText = `${selectedDay} - ${selectedTime}`; showStep(3); };
                     container.appendChild(div);
                 });
             });
         }
         function confirmBooking() {
-            const name = document.getElementById('client-name').value; const phone = document.getElementById('client-phone').value;
-            if(!name || !phone) return alert("Faltan datos"); const key = selectedTime.replace(/[: ]/g, '');
-            db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}/${key}`).set({ cliente: name, tel: phone, hora: selectedTime }).then(() => { alert("¡Cita agendada!"); location.reload(); });
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+
+            // MIENTRAS PRUEBAS: Todos los correos te llegan a ti
+            const miCorreo = "omarbeltran800@gmail.com";
+
+            const listaCorreos = {
+                "Barbero 1": miCorreo,
+                "Barbero 2": miCorreo,
+                "Barbero 3": miCorreo,
+                "Barbero 4": miCorreo
+            };
+
+            if (!name || !phone) return alert("Faltan datos");
+            const key = selectedTime.replace(/[: ]/g, '');
+
+            // 1. GUARDAR EN FIREBASE
+            db.ref(`citas/${currentWeek}/${selectedDay}/${selectedBarber}/${key}`).set({
+                cliente: name, tel: phone, hora: selectedTime
+            }).then(() => {
+
+                // 2. ENVIAR NOTIFICACIÓN POR EMAILJS
+                const datosNotificacion = {
+                    barber_name: selectedBarber,
+                    to_email: listaCorreos[selectedBarber],
+                    client_name: name,
+                    day: selectedDay,
+                    time: selectedTime
+                };
+
+                // Usando tus IDs que configuramos en la web
+                emailjs.send('service_dxuk7gl', 'template_lok6n9h', datosNotificacion)
+                    .then(() => {
+                        console.log("¡Notificación enviada!");
+                        // --- LO METIMOS AQUÍ ADENTRO ---
+                        alert("¡Cita agendada! El barbero recibirá un aviso por correo.");
+                        location.reload();
+                    }, (err) => {
+                        console.error("Error al enviar: ", err);
+                        // Por si falla el correo, que de todos modos agende y refresque
+                        alert("Cita agendada (hubo un detalle con el correo)");
+                        location.reload();
+                    });
+            });
         }
-        window.onload = bloquearDiasPasados;
+        // Inicializar funciones al cargar la página
+        window.onload = function () {
+            bloquearDiasPasados();
+        };
     </script>
 </body>
+
 </html>
