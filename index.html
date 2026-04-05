@@ -66,7 +66,8 @@
 </head>
 
 <body class="pb-10">
-
+<div id="banner-aviso" class="hidden bg-orange-600 text-white text-center py-3 px-4 text-[10px] font-black uppercase tracking-widest w-full sticky top-0 z-50 shadow-lg">
+        </div>
     <header class="py-10 text-center border-b border-zinc-900">
         <h1 class="text-6xl gothic text-white">B</h1>
         <p id="week-display" class="uppercase tracking-[0.3em] text-[9px] mt-3 font-bold text-zinc-500"></p>
@@ -164,6 +165,17 @@
         }
         const currentWeek = `2026-W${getWeekNumber()}`;
         document.getElementById('week-display').innerText = `SEMANA: ${currentWeek}`;
+        // Escuchar si el dueño pone un aviso global
+        db.ref('config/anuncio').on('value', (snapshot) => {
+            const data = snapshot.val();
+            const banner = document.getElementById('banner-aviso');
+            if(data && data.activo) {
+                banner.innerText = "📢 " + data.mensaje;
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        });
 
         function bloquearDiasPasados() {
             const fechaActual = new Date();

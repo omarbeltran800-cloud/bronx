@@ -35,7 +35,15 @@
             </div>
             <button onclick="location.reload()" class="bg-zinc-900 text-zinc-500 text-[9px] font-black px-4 py-2 rounded-full border border-zinc-800 uppercase italic">Salir</button>
         </header>
-
+<section class="mb-6 bg-zinc-900/30 p-6 rounded-[2.5rem] border border-zinc-800">
+            <h2 class="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-4 text-center italic">Aviso para Clientes</h2>
+            <input type="text" id="input-aviso" placeholder="Ej. Cerrado por Semana Santa..." class="w-full bg-black border border-zinc-800 text-xs p-4 rounded-2xl text-white outline-none mb-3 text-center">
+            <div class="flex gap-2">
+                <button onclick="publicarAviso()" class="flex-1 bg-orange-600 text-white font-black py-3 rounded-2xl text-[9px] uppercase tracking-widest active:scale-95 transition-all">Publicar</button>
+                <button onclick="quitarAviso()" class="flex-1 bg-zinc-800 text-zinc-400 font-black py-3 rounded-2xl text-[9px] uppercase tracking-widest active:scale-95 transition-all">Quitar</button>
+            </div>
+            <p id="aviso-actual" class="text-center text-[9px] mt-4 text-zinc-500 font-bold uppercase tracking-widest"></p>
+        </section>
         <section class="mb-10 bg-zinc-900/30 p-6 rounded-[2.5rem] border border-zinc-800">
             <h2 class="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-5 text-center italic">Control de Descansos</h2>
             <div class="grid grid-cols-2 gap-3">
@@ -195,6 +203,30 @@
         function quitarBloqueoDirecto(dia, barber) {
             db.ref(`config/descansos/${currentWeek}/${dia}/${barber}`).remove();
         }
+        // Lógica del Aviso Global
+        function publicarAviso() {
+            const msj = document.getElementById('input-aviso').value;
+            if(!msj) return alert("Escribe un aviso primero");
+            db.ref('config/anuncio').set({ activo: true, mensaje: msj });
+            document.getElementById('input-aviso').value = "";
+        }
+
+        function quitarAviso() {
+            if(confirm("¿Seguro que quieres quitar el aviso?")) {
+                db.ref('config/anuncio').set({ activo: false, mensaje: "" });
+            }
+        }
+
+        // Para que el admin vea si hay un aviso activo al entrar
+        db.ref('config/anuncio').on('value', (snapshot) => {
+            const data = snapshot.val();
+            const txtAviso = document.getElementById('aviso-actual');
+            if(data && data.activo) {
+                txtAviso.innerHTML = `<span class="text-orange-500">📢 ACTIVO:</span> ${data.mensaje}`;
+            } else {
+                txtAviso.innerText = "Ningún aviso activo en este momento.";
+            }
+        });
     </script>
 </body>
 </html>
